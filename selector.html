@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机选择器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .custom-mode {
+            width: 100%;
+            margin-top: 30px;
+        }
+        
+        .input-area {
+            margin-bottom: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 16px;
+        }
+        
+        .result {
+            margin-top: 30px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            min-height: 36px;
+        }
+        
+        @media (max-width: 480px) {
+            button {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .result {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>随机选择器</h1>
+        
+        <div class="buttons">
+            <button id="foodButton">今天吃什么</button>
+            <button id="customButton">自定义模式</button>
+        </div>
+        
+        <div class="custom-mode" id="customMode" style="display: none;">
+            <div class="input-area">
+                <textarea id="customList" placeholder="请输入列表，每行一个项目"></textarea>
+            </div>
+            <button id="randomButton">随机选择</button>
+        </div>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // 获取 DOM 元素
+        const foodButton = document.getElementById('foodButton');
+        const customButton = document.getElementById('customButton');
+        const customMode = document.getElementById('customMode');
+        const customList = document.getElementById('customList');
+        const randomButton = document.getElementById('randomButton');
+        const result = document.getElementById('result');
+        
+        // 食物列表
+        const foodList = [
+            "火锅", "披萨", "寿司", "汉堡", "烤肉", "意大利面", "沙拉", "中餐", "日料", "韩餐",
+            "烧烤", "麻辣烫", "奶茶", "咖啡", "三明治", "寿司", "拉面", "烧烤", "小吃", "快餐"
+        ];
+        
+        // 掷骰子函数
+        function getRandomItem(list) {
+            if (list.length === 0) {
+                return "列表为空，请输入项目";
+            }
+            const randomIndex = Math.floor(Math.random() * list.length);
+            return list[randomIndex];
+        }
+        
+        // 今天吃什么按钮点击事件
+        foodButton.addEventListener('click', () => {
+            const selectedItem = getRandomItem(foodList);
+            result.textContent = selectedItem;
+        });
+        
+        // 自定义模式按钮点击事件
+        customButton.addEventListener('click', () => {
+            customMode.style.display = customMode.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // 随机选择按钮点击事件
+        randomButton.addEventListener('click', () => {
+            const listText = customList.value.trim();
+            if (listText === '') {
+                result.textContent = "请输入列表";
+                return;
+            }
+            
+            const listItems = listText.split('\n').map(item => item.trim()).filter(item => item !== '');
+            const selectedItem = getRandomItem(listItems);
+            result.textContent = selectedItem;
+        });
+    </script>
+</body>
+</html>
