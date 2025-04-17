@@ -6,84 +6,128 @@
     <title>随机选择器</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            background-color: #f5f5f5;
             padding: 20px;
             box-sizing: border-box;
+            color: #333;
         }
         
         .container {
             text-align: center;
             max-width: 600px;
             width: 100%;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
         h1 {
-            color: #333;
+            color: #2c3e50;
             margin-bottom: 30px;
+            font-size: 28px;
         }
         
         .buttons {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 30px;
         }
         
         button {
-            padding: 12px 24px;
-            font-size: 18px;
-            background-color: #4CAF50;
+            padding: 12px 0;
+            font-size: 16px;
+            background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
-            width: 100%;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         button:hover {
-            background-color: #45a049;
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
         .custom-mode {
-            width: 100%;
             margin-top: 30px;
+            display: none;
         }
         
         .input-area {
+            display: flex;
             margin-bottom: 20px;
         }
         
         textarea {
             width: 100%;
             height: 150px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             resize: vertical;
             font-family: inherit;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
         }
         
         .result {
             margin-top: 30px;
-            font-size: 24px;
+            margin-bottom: 20px;
+            font-size: 28px;
             font-weight: bold;
-            color: #333;
-            min-height: 36px;
+            color: #2c3e50;
+            min-height: 40px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
         }
         
-        @media (max-width: 480px) {
-            button {
-                padding: 10px 20px;
-                font-size: 16px;
+        .result-highlight {
+            animation: highlight 1.5s ease;
+            background-color: #e8f4fc;
+            color: #1a73e8;
+        }
+        
+        @keyframes highlight {
+            0% { background-color: #f8f9fa; }
+            50% { background-color: #e8f4fc; }
+            100% { background-color: #f8f9fa; }
+        }
+        
+        .category-title {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .buttons {
+                grid-template-columns: 1fr;
             }
             
             h1 {
@@ -91,7 +135,7 @@
             }
             
             .result {
-                font-size: 20px;
+                font-size: 24px;
             }
         }
     </style>
@@ -99,25 +143,32 @@
 <body>
     <div class="container">
         <h1>随机选择器</h1>
-        
+        <div class="result" id="result"></div>
         <div class="buttons">
             <button id="foodButton">今天吃什么</button>
+            <button id="cityButton">去哪个城市玩</button>
+            <button id="sportButton">今天做什么运动</button>
+            <button id="placeButton">今天去哪里玩</button>
+            <button id="praiseButton">夸夸机</button>
             <button id="customButton">自定义模式</button>
         </div>
         
-        <div class="custom-mode" id="customMode" style="display: none;">
+        <div class="custom-mode" id="customMode">
+            <div class="category-title">自定义模式</div>
             <div class="input-area">
                 <textarea id="customList" placeholder="请输入列表，每行一个项目"></textarea>
             </div>
             <button id="randomButton">随机选择</button>
         </div>
-        
-        <div class="result" id="result"></div>
     </div>
 
     <script>
         // 获取 DOM 元素
         const foodButton = document.getElementById('foodButton');
+        const cityButton = document.getElementById('cityButton');
+        const sportButton = document.getElementById('sportButton');
+        const placeButton = document.getElementById('placeButton');
+        const praiseButton = document.getElementById('praiseButton');
         const customButton = document.getElementById('customButton');
         const customMode = document.getElementById('customMode');
         const customList = document.getElementById('customList');
@@ -130,6 +181,60 @@
             "烧烤", "麻辣烫", "奶茶", "咖啡", "三明治", "寿司", "拉面", "烧烤", "小吃", "快餐"
         ];
         
+        // 城市列表 - 国内
+        const domesticCities = [
+            "北京", "上海", "广州", "深圳", "成都", "重庆", "杭州", "西安", "南京", "武汉",
+            "厦门", "青岛", "三亚", "丽江", "大理", "桂林", "张家界", "哈尔滨", "长春", "昆明"
+        ];
+        
+        // 城市列表 - 国外
+        const internationalCities = [
+            "东京", "纽约", "伦敦", "巴黎", "罗马", "悉尼", "首尔", "曼谷", "新加坡", "迪拜",
+            "巴厘岛", "普吉岛", "马尔代夫", "巴黎", "伦敦", "罗马", "威尼斯", "阿姆斯特丹", "维也纳", "布拉格"
+        ];
+        
+        // 运动列表 - 有氧
+        const aerobicSports = [
+            "跑步", "游泳", "骑自行车", "跳绳", "慢跑", "徒步", "瑜伽", "跳舞", "爬山", "椭圆机",
+            "划船机", "有氧操", "羽毛球", "网球", "篮球", "足球", "排球", "壁球", "滑雪", "滑冰"
+        ];
+        
+        // 运动列表 - 无氧
+        const anaerobicSports = [
+            "举重", "俯卧撑", "深蹲", "仰卧起坐", "引体向上", "平板支撑", "哑铃训练", "杠铃训练", "器械训练", "弹力带训练",
+            "普拉提", "健美操", "攀岩", "短跑", "冲刺", "力量训练", "HIIT训练", "核心训练", "平衡训练", "柔韧性训练"
+        ];
+        
+        // 地点列表
+        const placeList = [
+            "公园", "咖啡店", "博物馆", "图书馆", "电影院", "购物中心", "健身房", "海滩", "山", "河边",
+            "图书馆", "艺术馆", "植物园", "动物园", "游乐园", "温泉", "SPA中心", "书店", "夜市", "步行街"
+        ];
+        
+        // 夸夸机列表
+        const praiseList = [
+            "你今天看起来特别精神！",
+            "你真是个解决问题的高手！",
+            "你的笑容能照亮整个房间！",
+            "你有独特的魅力和气质！",
+            "你总是能给人带来正能量！",
+            "你的想法总是那么有创意！",
+            "你真是个值得信赖的人！",
+            "你对待生活的态度让人钦佩！",
+            "你的善良让周围的人都感到温暖！",
+            "你真是个不可多得的人才！",
+            "你的幽默感让人愉快！",
+            "你有很强的领导能力！",
+            "你真是个细心体贴的人！",
+            "你的努力和坚持令人敬佩！",
+            "你真是个有品味的人！",
+            "你的存在让周围变得更好！",
+            "你真是个值得深交的朋友！",
+            "你的智慧让人佩服！",
+            "你的乐观态度感染了我！",
+            "你真是个有爱心的人！"
+        ];
+        
         // 掷骰子函数
         function getRandomItem(list) {
             if (list.length === 0) {
@@ -139,10 +244,47 @@
             return list[randomIndex];
         }
         
+        // 显示结果函数
+        function showResult(text) {
+            result.textContent = text;
+            result.classList.add('result-highlight');
+            setTimeout(() => {
+                result.classList.remove('result-highlight');
+            }, 1500);
+        }
+        
         // 今天吃什么按钮点击事件
         foodButton.addEventListener('click', () => {
             const selectedItem = getRandomItem(foodList);
-            result.textContent = selectedItem;
+            showResult(selectedItem);
+        });
+        
+        // 去哪个城市玩按钮点击事件
+        cityButton.addEventListener('click', () => {
+            const type = Math.random() > 0.5 ? domesticCities : internationalCities;
+            const selectedItem = getRandomItem(type);
+            const category = type === domesticCities ? "国内" : "国外";
+            showResult(`${category}城市：${selectedItem}`);
+        });
+        
+        // 今天做什么运动按钮点击事件
+        sportButton.addEventListener('click', () => {
+            const type = Math.random() > 0.5 ? aerobicSports : anaerobicSports;
+            const selectedItem = getRandomItem(type);
+            const category = type === aerobicSports ? "有氧" : "无氧";
+            showResult(`${category}运动：${selectedItem}`);
+        });
+        
+        // 今天去哪里玩按钮点击事件
+        placeButton.addEventListener('click', () => {
+            const selectedItem = getRandomItem(placeList);
+            showResult(selectedItem);
+        });
+        
+        // 夸夸机按钮点击事件
+        praiseButton.addEventListener('click', () => {
+            const selectedItem = getRandomItem(praiseList);
+            showResult(selectedItem);
         });
         
         // 自定义模式按钮点击事件
@@ -154,13 +296,13 @@
         randomButton.addEventListener('click', () => {
             const listText = customList.value.trim();
             if (listText === '') {
-                result.textContent = "请输入列表";
+                showResult("请输入列表");
                 return;
             }
             
             const listItems = listText.split('\n').map(item => item.trim()).filter(item => item !== '');
             const selectedItem = getRandomItem(listItems);
-            result.textContent = selectedItem;
+            showResult(selectedItem);
         });
     </script>
 </body>
